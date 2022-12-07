@@ -25,16 +25,14 @@ import torch
 input_features = 2048
 output_features = 512
 device_id = [0]
-device = "cuda:0"
+device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
-a = torch.randint_like(torch.zeros(10, 3, 224, 224), 0, 255)
-p = torch.randint_like(torch.zeros(10, 3, 224, 224), 0, 255)
-n = torch.randint_like(torch.zeros(10, 3, 224, 224), 0, 255)
+a = torch.randint_like(torch.zeros(10, 3, 224, 224), 0, 255, device=device)
+p = torch.randint_like(torch.zeros(10, 3, 224, 224), 0, 255, device=device)
+n = torch.randint_like(torch.zeros(10, 3, 224, 224), 0, 255, device=device)
 
 p_label = torch.zeros(10)
 n_label = torch.ones(10)
-print(p_label)
-print(a)
 #
 # pred = model(x)
 #
@@ -42,6 +40,7 @@ print(a)
 
 
 model = resnet.Resnet_152(512)
+model.to(device)
 # print(model)
 
 arcface = ArcFace(input_features, output_features)
@@ -49,10 +48,17 @@ arcface = ArcFace(input_features, output_features)
 # model.load_state_dict(ResNet152_Weights.get_state_dict(ResNet152_Weights.DEFAULT, True))
 model.eval()
 
-simesnet = SiamaseNet()
-# simesnet.to(device)
+simesnet = SiamaseNet(device=device)
+simesnet.to(device)
 #
 simesnet.eval()
+
+# a.cuda(device)
+# p.to(device)
+# n.to(device)
+
+print("is cuda: ", a.is_cuda)
+print("is model cuda: ", torch.cuda.get_device_name(0))
 
 a_features = model(a)
 p_features = model(p)
@@ -73,6 +79,11 @@ n_features = model(n)
 
 ap_dis, an_dis = simesnet(a_features, p_features, n_features)
 print(ap_dis, an_dis)
+
+loss = torch.abs(ap_dis - an_dis)
+print(f'sub: {loss}')
+loss = torch.mean(torch.clamp(loss + 0.5, min=0.0))
+print(loss)
 #
 # margin = 0.5
 # loss = ap_dis - an_dis

@@ -7,8 +7,8 @@ class TripletLoss:
         self.loss_val = 0
 
     def compute_loss(self, ap_dis, an_dis):
-        loss = ap_dis - an_dis
-        return torch.sum(torch.clamp(loss + self.margin, min=0.0))
+        loss = torch.abs(ap_dis - an_dis)
+        return torch.mean(torch.clamp(loss + self.margin, min=0.0))
 
     def update(self, new_val):
         self.loss_val = new_val

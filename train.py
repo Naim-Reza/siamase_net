@@ -16,7 +16,7 @@ if __name__ == '__main__':
     # train_data_root = ''
     # anchor_data_root = ''
     # positive_data_root = ''
-    data_root = '/media/naim/4A62E7E862E7D6AB/Users/chosun/Datasets/setA_less/'
+    data_root = '/media/naim/4A62E7E862E7D6AB/Users/chosun/Datasets/test_set/'
 
     input_size = 112
     batch_size = 4
