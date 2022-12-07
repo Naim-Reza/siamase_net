@@ -9,11 +9,12 @@ class Flatten(nn.Module):
 
 
 class SiamaseNet(nn.Module):
-    def __init__(self, input_features=2048, output_features=512):
+    def __init__(self, input_features=2048, output_features=512, device=None):
         super(SiamaseNet, self).__init__()
         self.input_features = input_features
         self.output_features = output_features
-        self.arcface = ArcFace(self.input_features, self.output_features)
+        self.device = device
+        self.arcface = ArcFace(self.input_features, self.output_features, device_id=[0])
         self.flat = Flatten()
         self.sc = nn.Sequential(
             nn.Linear(in_features=self.input_features, out_features=self.output_features),
@@ -27,8 +28,8 @@ class SiamaseNet(nn.Module):
         self.distance = DistanceLayer()
 
     def forward(self, anchor, positive, negative):
-        positive_labels = torch.zeros(anchor.shape[0])
-        negative_labels = torch.ones(negative.shape[0])
+        positive_labels = torch.zeros(anchor.shape[0]).to(self.device)
+        negative_labels = torch.ones(negative.shape[0]).to(self.device)
         an_emb = self.arcface(self.flat(anchor), positive_labels)
         pos_emb = self.arcface(self.flat(positive), positive_labels)
         neg_emb = self.arcface(self.flat(negative), negative_labels)

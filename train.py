@@ -42,7 +42,7 @@ if __name__ == '__main__':
 
     # ===== Embedding generator ==== #
     backbone = resnet.Resnet_152(embedding_size)
-    head = siamasenet.SiamaseNet()
+    head = siamasenet.SiamaseNet(device=device)
 
     # def distance_function(x1, x2):
     #     return torch.max(torch.abs(x1 - x2), dim=1).values
