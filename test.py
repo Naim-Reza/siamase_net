@@ -6,8 +6,15 @@ from DataLoader import SiameseDataset
 import os
 import numpy as np
 from tqdm import tqdm
+import argparse
 
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser(prog="Test", description="Generate test result for trained model")
+    parser.add_argument('logFileName')
+    parser.add_argument('backbonePath')
+    parser.add_argument('headPath')
+    args = parser.parse_args()
+
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     data_root = '/media/naim/4A62E7E862E7D6AB/Users/chosun/Datasets/test_set/'
     weights_root = './weights'
@@ -26,9 +33,13 @@ if __name__ == '__main__':
 
     # === Load Model === #
     backbone = resnet.Resnet_152(embedding_size)
-    head = siamasenet.SiamaseNet()
+    head = siamasenet.SiamaseNet(device=device)
 
-    latest_backbone_path, latest_head_path = get_latest_weights(weights_root)
+    if args.backbonePath and args.headPath:
+        latest_backbone_path, latest_head_path = os.path.join(weights_root, args.backbonePath), os.path.join(
+            weights_root, args.headPath)
+    else:
+        latest_backbone_path, latest_head_path = get_latest_weights(weights_root)
 
     print(f'Loading Backbone from {latest_backbone_path}')
     backbone.load_state_dict(torch.load(latest_backbone_path))
@@ -70,7 +81,7 @@ if __name__ == '__main__':
 
         # print(positive_distances)
 
-    log_file = os.path.join(LOG_DIR, 'test_200_logs.npy')
+    log_file = os.path.join(LOG_DIR, f'test_{args.logFileName}_logs.npy')
     print(f'saving test result logs in {log_file}')
 
     np.save(log_file, np.array([positive_dict, negative_dict]))

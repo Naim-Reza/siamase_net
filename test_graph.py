@@ -2,9 +2,15 @@ import numpy as np
 import matplotlib.pyplot as plt
 import os
 from utils import scatter_dict
+import argparse
+
+parser = argparse.ArgumentParser(prog='test_graph', description='Plot Scatter graph')
+parser.add_argument('logFileName')
+
+args = parser.parse_args()
 
 LOG_DIR = './logs'
-log_file = os.path.join(LOG_DIR, 'test_200_logs.npy')
+log_file = os.path.join(LOG_DIR, args.logFileName)
 test_logs = np.load(log_file, allow_pickle=True)
 
 positive_distances, negative_distances = test_logs[0], test_logs[1]
