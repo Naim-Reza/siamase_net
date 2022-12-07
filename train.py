@@ -44,10 +44,8 @@ if __name__ == '__main__':
     backbone = resnet.Resnet_152(embedding_size)
     head = siamasenet.SiamaseNet()
 
-
-    def distance_function(x1, x2):
-        return torch.max(torch.abs(x1 - x2), dim=1).values
-
+    # def distance_function(x1, x2):
+    #     return torch.max(torch.abs(x1 - x2), dim=1).values
 
     # ==== Training ==== #
     loss_margin = 0.5

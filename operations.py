@@ -6,6 +6,8 @@ from tqdm import tqdm
 import numpy as np
 
 LOG_DIR = './logs'
+BACKBONE_NAME = 'Resnet152'
+HEAD_NAME = 'ArcFace'
 
 
 def train(train_dataloader, val_dataloader, backbone, head, num_epoch, device, criterion, optimizer, batch_size,
@@ -78,12 +80,14 @@ def train(train_dataloader, val_dataloader, backbone, head, num_epoch, device, c
         if best_loss > val_loss:
             print(f"Saving Weights for Epoch: {epoch + 1}")
             best_loss = val_loss
-            torch.save(backbone.state_dict(), os.path.join(weight_root, f"Backbone_Epoch_{epoch + 1}_Time{get_time()}"))
-            torch.save(head.state_dict(), os.path.join(weight_root, f"Head_Epoch_{epoch + 1}_Time{get_time()}"))
+            torch.save(backbone.state_dict(),
+                       os.path.join(weight_root, f"Backbone_{BACKBONE_NAME}_Epoch_{epoch + 1}_Time{get_time()}"))
+            torch.save(head.state_dict(),
+                       os.path.join(weight_root, f"Head_{HEAD_NAME}_Epoch_{epoch + 1}_Time{get_time()}"))
 
         if epoch % writing_freq == 0:
             writeable_array = np.array([training_losses, validation_losses])
-            log_file = os.path.join(LOG_DIR, 'train_log')
+            log_file = os.path.join(LOG_DIR, f'train_{HEAD_NAME}_log')
             np.save(log_file, writeable_array)
 
     return training_losses, validation_losses

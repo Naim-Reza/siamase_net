@@ -1,5 +1,6 @@
 import torch.nn as nn
 import torch
+from head_models import ArcFace
 
 
 class Flatten(nn.Module):
@@ -8,11 +9,14 @@ class Flatten(nn.Module):
 
 
 class SiamaseNet(nn.Module):
-    def __init__(self):
+    def __init__(self, input_features=2048, output_features=512):
         super(SiamaseNet, self).__init__()
+        self.input_features = input_features
+        self.output_features = output_features
+        self.arcface = ArcFace(self.input_features, self.output_features)
         self.flat = Flatten()
         self.sc = nn.Sequential(
-            nn.Linear(in_features=2048, out_features=512),
+            nn.Linear(in_features=self.input_features, out_features=self.output_features),
             nn.ReLU(inplace=True),
             nn.BatchNorm1d(num_features=512),
             nn.Linear(in_features=512, out_features=256),
@@ -23,11 +27,18 @@ class SiamaseNet(nn.Module):
         self.distance = DistanceLayer()
 
     def forward(self, anchor, positive, negative):
-        an_emb = self.sc(self.flat(anchor))
-        pos_emb = self.sc(self.flat(positive))
-        neg_emb = self.sc(self.flat(negative))
+        positive_labels = torch.zeros(anchor.shape[0])
+        negative_labels = torch.ones(negative.shape[0])
+        an_emb = self.arcface(self.flat(anchor), positive_labels)
+        pos_emb = self.arcface(self.flat(positive), positive_labels)
+        neg_emb = self.arcface(self.flat(negative), negative_labels)
+
+        # an_emb = self.sc(self.flat(anchor))
+        # pos_emb = self.sc(self.flat(positive))
+        # neg_emb = self.sc(self.flat(negative))
         return self.distance(an_emb, pos_emb, neg_emb)
         # return an_emb, pos_emb, neg_emb
+        # return self.flat(anchor), self.flat(positive), self.flat(negative)
 
 
 class DistanceLayer(nn.Module):
