@@ -1,3 +1,6 @@
 Head Name,Average Positive Distance,Average Negative Distance
 Siamese,1.5737243,2.2743115
 SoftMax,1.5838517,2.2476048
+SphereFace,1.9472771,13.518202
+CosFace,2.6912737,23.007221
+ArcFace,2.7413213,31.150417

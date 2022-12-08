@@ -36,11 +36,11 @@ if __name__ == '__main__':
     # === Load Model === #
     backbone = resnet.Resnet_152(embedding_size)
     # softmax = Softmax(input_feature_size, embedding_size, device_id=[torch.cuda._get_device_index(device)])
-    sphereface = SphereFace(input_feature_size, embedding_size, device_id=[torch.cuda._get_device_index(device)])
+    # sphereface = SphereFace(input_feature_size, embedding_size, device_id=[torch.cuda._get_device_index(device)])
     # cosface = CosFace(input_feature_size, embedding_size, device_id=[torch.cuda._get_device_index(device)])
-    # arcface = ArcFace(input_feature_size, embedding_size, device_id=[torch.cuda._get_device_index(device)])
+    arcface = ArcFace(input_feature_size, embedding_size, device_id=[torch.cuda._get_device_index(device)])
     # head = siamasenet.SiamaseNet(device=device, head_name='Linear')
-    head = siamasenet.SiamaseNet(device=device, head=sphereface, head_name=sphereface.name)
+    head = siamasenet.SiamaseNet(device=device, head=arcface, head_name=arcface.name)
 
     if args.backbonePath and args.headPath:
         latest_backbone_path, latest_head_path = os.path.join(weights_root, args.backbonePath), os.path.join(

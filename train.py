@@ -44,12 +44,12 @@ if __name__ == '__main__':
 
     # ===== Embedding generator ==== #
     # softmax = Softmax(input_feature_size, embedding_size, device_id=[torch.cuda._get_device_index(device)])
-    sphereface = SphereFace(input_feature_size, embedding_size, device_id=[torch.cuda._get_device_index(device)])
+    # sphereface = SphereFace(input_feature_size, embedding_size, device_id=[torch.cuda._get_device_index(device)])
     # cosface = CosFace(input_feature_size, embedding_size, device_id=[torch.cuda._get_device_index(device)])
-    # arcface = ArcFace(input_feature_size, embedding_size, device_id=[torch.cuda._get_device_index(device)])
+    arcface = ArcFace(input_feature_size, embedding_size, device_id=[torch.cuda._get_device_index(device)])
     backbone = resnet.Resnet_152(embedding_size)
     # head = siamasenet.SiamaseNet(device=device, head_name='Linear')
-    head = siamasenet.SiamaseNet(device=device, head=sphereface, head_name=sphereface.name)
+    head = siamasenet.SiamaseNet(device=device, head=arcface, head_name=arcface.name)
 
     # def distance_function(x1, x2):
     #     return torch.max(torch.abs(x1 - x2), dim=1).values
