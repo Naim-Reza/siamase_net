@@ -1,5 +1,6 @@
 import torch.utils.data
 from model import resnet, siamasenet
+from model.head_models import Softmax, SphereFace, CosFace, ArcFace
 from utils import get_latest_weights
 from DataLoader import SiameseDataset
 
@@ -11,17 +12,18 @@ import argparse
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(prog="Test", description="Generate test result for trained model")
     parser.add_argument('logFileName')
-    parser.add_argument('backbonePath')
-    parser.add_argument('headPath')
+    parser.add_argument('backbonePath', nargs='?')
+    parser.add_argument('headPath', nargs='?')
     args = parser.parse_args()
 
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-    data_root = '/media/naim/4A62E7E862E7D6AB/Users/chosun/Datasets/test_set/'
+    data_root = '/media/naim/4A62E7E862E7D6AB/Users/chosun/Datasets/test_set_1/'
     weights_root = './weights'
     LOG_DIR = './logs'
 
     input_size = 112
     batch_size = 4
+    input_feature_size = 2048
     embedding_size = 512
     num_workers = 4
     pin_memory = True
@@ -33,7 +35,12 @@ if __name__ == '__main__':
 
     # === Load Model === #
     backbone = resnet.Resnet_152(embedding_size)
-    head = siamasenet.SiamaseNet(device=device)
+    # softmax = Softmax(input_feature_size, embedding_size, device_id=[torch.cuda._get_device_index(device)])
+    # sphereface = SphereFace(input_feature_size, embedding_size, device_id=[torch.cuda._get_device_index(device)])
+    # cosface = CosFace(input_feature_size, embedding_size, device_id=[torch.cuda._get_device_index(device)])
+    # arcface = ArcFace(input_feature_size, embedding_size, device_id=[torch.cuda._get_device_index(device)])
+    head = siamasenet.SiamaseNet(device=device, head_name='Linear')
+    # head = siamasenet.SiamaseNet(device=device, head=arcface, head_name=arcface.name)
 
     if args.backbonePath and args.headPath:
         latest_backbone_path, latest_head_path = os.path.join(weights_root, args.backbonePath), os.path.join(

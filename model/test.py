@@ -1,7 +1,7 @@
 import resnet
 from torchvision.models import ResNet152_Weights
 from siamasenet import SiamaseNet
-from head_models import ArcFace
+from head_models import ArcFace, CosFace, SphereFace, Softmax
 import torch
 
 # input_size = [224, 224]
@@ -43,12 +43,19 @@ model = resnet.Resnet_152(512)
 model.to(device)
 # print(model)
 
-arcface = ArcFace(input_features, output_features)
+softmax = Softmax(input_features, output_features, device_id=[torch.cuda._get_device_index(device)])
+sphereface = SphereFace(input_features, output_features, device_id=[torch.cuda._get_device_index(device)])
+cosface = CosFace(input_features, output_features, device_id=[torch.cuda._get_device_index(device)])
+arcface = ArcFace(input_features, output_features, device_id=[torch.cuda._get_device_index(device)])
 
 # model.load_state_dict(ResNet152_Weights.get_state_dict(ResNet152_Weights.DEFAULT, True))
 model.eval()
 
-simesnet = SiamaseNet(device=device)
+# simesnet = SiamaseNet(device=device, head_name='Linear')
+# simesnet = SiamaseNet(device=device, head=softmax, head_name=softmax.name)
+# simesnet = SiamaseNet(device=device, head=sphereface, head_name=sphereface.name)
+# simesnet = SiamaseNet(device=device, head=cosface, head_name=cosface.name)
+simesnet = SiamaseNet(device=device, head=arcface, head_name=arcface.name)
 simesnet.to(device)
 #
 simesnet.eval()
@@ -80,9 +87,9 @@ n_features = model(n)
 ap_dis, an_dis = simesnet(a_features, p_features, n_features)
 print(ap_dis, an_dis)
 
-loss = torch.abs(ap_dis - an_dis)
+loss = ap_dis - an_dis
 print(f'sub: {loss}')
-loss = torch.mean(torch.clamp(loss + 0.5, min=0.0))
+loss = torch.max(torch.clamp(loss + 0.5, min=0.0))
 print(loss)
 #
 # margin = 0.5

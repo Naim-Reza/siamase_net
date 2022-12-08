@@ -7,7 +7,7 @@ import numpy as np
 
 LOG_DIR = './logs'
 BACKBONE_NAME = 'Resnet152'
-HEAD_NAME = 'ArcFace'
+HEAD_NAME = 'Linear'
 
 
 def train(train_dataloader, val_dataloader, backbone, head, num_epoch, device, criterion, optimizer, batch_size,
@@ -83,12 +83,15 @@ def train(train_dataloader, val_dataloader, backbone, head, num_epoch, device, c
             torch.save(backbone.state_dict(),
                        os.path.join(weight_root, f"Backbone_{BACKBONE_NAME}_Epoch_{epoch + 1}_Time{get_time()}"))
             torch.save(head.state_dict(),
-                       os.path.join(weight_root, f"Head_{HEAD_NAME}_Epoch_{epoch + 1}_Time{get_time()}"))
+                       os.path.join(weight_root, f"Head_{head.head_name}_Epoch_{epoch + 1}_Time{get_time()}"))
 
         if epoch % writing_freq == 0:
             writeable_array = np.array([training_losses, validation_losses])
-            log_file = os.path.join(LOG_DIR, f'train_{HEAD_NAME}_log')
+            log_file = os.path.join(LOG_DIR, f'train_{head.head_name}_log')
             np.save(log_file, writeable_array)
+
+        if epoch_loss == 0:
+            break
 
     return training_losses, validation_losses
 

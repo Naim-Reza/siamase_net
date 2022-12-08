@@ -7,6 +7,7 @@ import torch.utils.data
 from DataLoader import SiameseDataset
 from loss import TripletLoss
 from model import siamasenet, resnet
+from model.head_models import Softmax, SphereFace, CosFace, ArcFace
 from operations import train
 from utils import show_training_results
 
@@ -20,6 +21,7 @@ if __name__ == '__main__':
 
     input_size = 112
     batch_size = 4
+    input_feature_size = 2048
     embedding_size = 512
     num_workers = 4
     pin_memory = True
@@ -41,8 +43,13 @@ if __name__ == '__main__':
                                                  pin_memory=pin_memory)
 
     # ===== Embedding generator ==== #
+    # softmax = Softmax(input_feature_size, embedding_size, device_id=[torch.cuda._get_device_index(device)])
+    # sphereface = SphereFace(input_feature_size, embedding_size, device_id=[torch.cuda._get_device_index(device)])
+    # cosface = CosFace(input_feature_size, embedding_size, device_id=[torch.cuda._get_device_index(device)])
+    # arcface = ArcFace(input_feature_size, embedding_size, device_id=[torch.cuda._get_device_index(device)])
     backbone = resnet.Resnet_152(embedding_size)
-    head = siamasenet.SiamaseNet(device=device)
+    head = siamasenet.SiamaseNet(device=device, head_name='Linear')
+    # head = siamasenet.SiamaseNet(device=device, head=arcface, head_name=arcface.name)
 
     # def distance_function(x1, x2):
     #     return torch.max(torch.abs(x1 - x2), dim=1).values
