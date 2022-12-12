@@ -11,7 +11,7 @@ class Flatten(nn.Module):
 class SiamaseNet(nn.Module):
     def __init__(self, head=None, head_name='Linear', input_features=2048, output_features=512, device=None):
         super(SiamaseNet, self).__init__()
-        assert head_name in ['ArcFace', 'CosFace', 'SphereFace', 'SoftMax', 'Linear']
+        assert head_name in ['ShaoFace', 'ArcFace', 'CosFace', 'SphereFace', 'SoftMax', 'Linear']
         self.head_name = head_name
         self.input_features = input_features
         self.output_features = output_features
@@ -34,7 +34,7 @@ class SiamaseNet(nn.Module):
         else:
             self.head = head
 
-        self.requires_label = ['ArcFace', 'CosFace', 'SphereFace']
+        self.requires_label = ['ShaoFace', 'ArcFace', 'CosFace', 'SphereFace']
 
     def forward(self, anchor, positive, negative):
         if self.head_name not in self.requires_label:

@@ -277,3 +277,83 @@ class Softmax(nn.Module):
                 nn.init.xavier_uniform_(m.weight.data)
                 if m.bias is not None:
                     m.bias.data.zero_()
+
+
+class ShaoFace(nn.Module):
+    r"""Implement of ArcFace (https://arxiv.org/pdf/1801.07698v1.pdf):
+        Args:
+            in_features: size of each input sample
+            out_features: size of each output sample
+            device_id: the ID of GPU where the model will be trained by model parallel.
+                       if device_id=None, it will be trained on CPU without model parallel.
+            s: norm of input feature
+            m: margin
+            cos(m*theta) - m
+        """
+
+    def __init__(self, in_features, out_features, device_id=None, m=4):
+        super(ShaoFace, self).__init__()
+        self.name = 'ShaoFace'
+        self.in_features = in_features
+        self.out_features = out_features
+        self.m = m
+        self.base = 1000.0
+        self.gamma = 0.12
+        self.power = 1
+        self.LambdaMin = 5.0
+        self.iter = 0
+        self.device_id = device_id
+
+        self.weight = Parameter(torch.FloatTensor(out_features, in_features))
+        nn.init.xavier_uniform_(self.weight)
+
+        # duplication formula
+        self.mlambda = [
+            lambda x: x ** 0,
+            lambda x: x ** 1,
+            lambda x: 2 * x ** 2 - 1,
+            lambda x: 4 * x ** 3 - 3 * x,
+            lambda x: 8 * x ** 4 - 8 * x ** 2 + 1,
+            lambda x: 16 * x ** 5 - 20 * x ** 3 + 5 * x
+        ]
+
+    def forward(self, input, label):
+        # lambda = max(lambda_min,base*(1+gamma*iteration)^(-power))
+        self.iter += 1
+        self.lamb = max(self.LambdaMin, self.base * (1 + self.gamma * self.iter) ** (-1 * self.power))
+
+        # --------------------------- cos(theta) & phi(theta) ---------------------------
+        if self.device_id == None:
+            cos_theta = F.linear(F.normalize(input), F.normalize(self.weight))
+        else:
+            x = input
+            sub_weights = torch.chunk(self.weight, len(self.device_id), dim=0)
+            temp_x = x.cuda(self.device_id[0])
+            weight = sub_weights[0].cuda(self.device_id[0])
+            cos_theta = F.linear(F.normalize(temp_x), F.normalize(weight))
+            for i in range(1, len(self.device_id)):
+                temp_x = x.cuda(self.device_id[i])
+                weight = sub_weights[i].cuda(self.device_id[i])
+                cos_theta = torch.cat(
+                    (cos_theta, F.linear(F.normalize(temp_x), F.normalize(weight)).cuda(self.device_id[0])), dim=1)
+
+        cos_theta = cos_theta.clamp(-1, 1)
+        # cos_m_theta = self.mlambda[self.m](cos_theta)
+        cos_m_theta = cos_theta * self.m
+        cos_m_theta_minus_m = cos_m_theta - self.m
+        theta = cos_theta.data.acos()
+        k = (self.m * theta / 3.14159265).floor()
+        phi_theta = ((-1.0) ** k) * cos_m_theta_minus_m - 2 * k
+        NormOfFeature = torch.norm(input, 2, 1)
+
+        # --------------------------- convert label to one-hot ---------------------------
+        one_hot = torch.zeros(cos_theta.size())
+        if self.device_id != None:
+            one_hot = one_hot.cuda(self.device_id[0])
+        one_hot.scatter_(1, label.view(-1, 1).long(), 1)
+
+        # --------------------------- Calculate output ---------------------------
+        output = (one_hot * (phi_theta - cos_theta) / (1 + self.lamb)) + cos_theta
+        output *= NormOfFeature.view(-1, 1)
+
+        return output

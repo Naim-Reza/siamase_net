@@ -7,7 +7,7 @@ import torch.utils.data
 from DataLoader import SiameseDataset
 from loss import TripletLoss
 from model import siamasenet, resnet
-from model.head_models import Softmax, SphereFace, CosFace, ArcFace
+from model.head_models import Softmax, SphereFace, CosFace, ArcFace, ShaoFace
 from operations import train
 from utils import show_training_results
 
@@ -17,7 +17,7 @@ if __name__ == '__main__':
     # train_data_root = ''
     # anchor_data_root = ''
     # positive_data_root = ''
-    data_root = '/media/naim/4A62E7E862E7D6AB/Users/chosun/Datasets/setA_less/'
+    data_root = '/media/naim/4A62E7E862E7D6AB/Users/chosun/Datasets/test_set/'
 
     input_size = 112
     batch_size = 4
@@ -46,10 +46,11 @@ if __name__ == '__main__':
     # softmax = Softmax(input_feature_size, embedding_size, device_id=[torch.cuda._get_device_index(device)])
     # sphereface = SphereFace(input_feature_size, embedding_size, device_id=[torch.cuda._get_device_index(device)])
     # cosface = CosFace(input_feature_size, embedding_size, device_id=[torch.cuda._get_device_index(device)])
-    arcface = ArcFace(input_feature_size, embedding_size, device_id=[torch.cuda._get_device_index(device)])
+    # arcface = ArcFace(input_feature_size, embedding_size, device_id=[torch.cuda._get_device_index(device)])
+    shaoface = ShaoFace(input_feature_size, embedding_size, device_id=[torch.cuda._get_device_index(device)])
     backbone = resnet.Resnet_152(embedding_size)
     # head = siamasenet.SiamaseNet(device=device, head_name='Linear')
-    head = siamasenet.SiamaseNet(device=device, head=arcface, head_name=arcface.name)
+    head = siamasenet.SiamaseNet(device=device, head=shaoface, head_name=shaoface.name)
 
     # def distance_function(x1, x2):
     #     return torch.max(torch.abs(x1 - x2), dim=1).values

@@ -1,7 +1,7 @@
 import resnet
 from torchvision.models import ResNet152_Weights
 from siamasenet import SiamaseNet
-from head_models import ArcFace, CosFace, SphereFace, Softmax
+from head_models import ArcFace, CosFace, SphereFace, Softmax, ShaoFace
 import torch
 
 # input_size = [224, 224]
@@ -47,6 +47,7 @@ softmax = Softmax(input_features, output_features, device_id=[torch.cuda._get_de
 sphereface = SphereFace(input_features, output_features, device_id=[torch.cuda._get_device_index(device)])
 cosface = CosFace(input_features, output_features, device_id=[torch.cuda._get_device_index(device)])
 arcface = ArcFace(input_features, output_features, device_id=[torch.cuda._get_device_index(device)])
+shaoface = ShaoFace(input_features, output_features, device_id=[torch.cuda._get_device_index(device)])
 
 # model.load_state_dict(ResNet152_Weights.get_state_dict(ResNet152_Weights.DEFAULT, True))
 model.eval()
@@ -55,7 +56,7 @@ model.eval()
 # simesnet = SiamaseNet(device=device, head=softmax, head_name=softmax.name)
 # simesnet = SiamaseNet(device=device, head=sphereface, head_name=sphereface.name)
 # simesnet = SiamaseNet(device=device, head=cosface, head_name=cosface.name)
-simesnet = SiamaseNet(device=device, head=arcface, head_name=arcface.name)
+simesnet = SiamaseNet(device=device, head=shaoface, head_name=shaoface.name)
 simesnet.to(device)
 #
 simesnet.eval()

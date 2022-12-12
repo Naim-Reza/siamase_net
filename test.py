@@ -1,6 +1,6 @@
 import torch.utils.data
 from model import resnet, siamasenet
-from model.head_models import Softmax, SphereFace, CosFace, ArcFace
+from model.head_models import Softmax, SphereFace, CosFace, ArcFace, ShaoFace
 from utils import get_latest_weights
 from DataLoader import SiameseDataset
 
@@ -17,7 +17,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-    data_root = '/media/naim/4A62E7E862E7D6AB/Users/chosun/Datasets/test_set/'
+    data_root = '/media/naim/4A62E7E862E7D6AB/Users/chosun/Datasets/test_set_1/'
     weights_root = './weights'
     LOG_DIR = './logs'
 
@@ -38,9 +38,10 @@ if __name__ == '__main__':
     # softmax = Softmax(input_feature_size, embedding_size, device_id=[torch.cuda._get_device_index(device)])
     # sphereface = SphereFace(input_feature_size, embedding_size, device_id=[torch.cuda._get_device_index(device)])
     # cosface = CosFace(input_feature_size, embedding_size, device_id=[torch.cuda._get_device_index(device)])
-    arcface = ArcFace(input_feature_size, embedding_size, device_id=[torch.cuda._get_device_index(device)])
+    # arcface = ArcFace(input_feature_size, embedding_size, device_id=[torch.cuda._get_device_index(device)])
+    shaoface = ShaoFace(input_feature_size, embedding_size, device_id=[torch.cuda._get_device_index(device)])
     # head = siamasenet.SiamaseNet(device=device, head_name='Linear')
-    head = siamasenet.SiamaseNet(device=device, head=arcface, head_name=arcface.name)
+    head = siamasenet.SiamaseNet(device=device, head=shaoface, head_name=shaoface.name)
 
     if args.backbonePath and args.headPath:
         latest_backbone_path, latest_head_path = os.path.join(weights_root, args.backbonePath), os.path.join(
