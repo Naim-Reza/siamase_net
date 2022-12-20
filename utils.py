@@ -40,7 +40,7 @@ def get_latest_weights(weight_dir):
     raise RuntimeError("No Backbone or Head weights found!!")
 
 
-def scatter_dict(dict):
+def to_array(dict):
     x = []
     y = []
     for key in dict.keys():

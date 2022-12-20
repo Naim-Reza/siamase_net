@@ -1,7 +1,7 @@
 import os
 import argparse
 import numpy as np
-from utils import scatter_dict
+from utils import to_array
 import csv
 
 
@@ -10,8 +10,8 @@ def get_distances(log_file_path):
 
     positive_distances, negative_distances = test_logs[0], test_logs[1]
 
-    x_p, y_p = scatter_dict(positive_distances)
-    x_n, y_n = scatter_dict(negative_distances)
+    x_p, y_p = to_array(positive_distances)
+    x_n, y_n = to_array(negative_distances)
 
     return x_p, x_n
 
