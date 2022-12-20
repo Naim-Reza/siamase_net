@@ -13,6 +13,7 @@ class SiameseDataset(Dataset):
         self.train = train
         self.test = test
         self.transforms = transforms.Compose([
+            transforms.CenterCrop(image_size),
             transforms.Resize(image_size),
             transforms.ToTensor()
         ])
@@ -65,6 +66,8 @@ def generate_tuples(root_dir):
     a_images = list()
     p_images = list()
 
+    if not all_files[0]: all_files.pop(0)
+
     for i, sl in enumerate(classes):
         f = all_files[i]
         if f:
@@ -78,7 +81,8 @@ def generate_tuples(root_dir):
     n_images = shuffle(n_images, 42)
     n_images = n_images[0: len(a_images)]
     n_images = shuffle(n_images, 64)
-    img_tuple = zip(a_images, p_images, n_images)
+    # img_tuple = zip(a_images, p_images, n_images)
+    img_tuple = zip(reversed(a_images), reversed(p_images), reversed(n_images))
     return list(img_tuple)
 
 

@@ -17,7 +17,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-    data_root = '/media/naim/4A62E7E862E7D6AB/Users/chosun/Datasets/test_set_1/'
+    data_root = '/media/naim/4A62E7E862E7D6AB/Users/chosun/Datasets/frvt_detected_faces/'
     weights_root = './weights'
     LOG_DIR = './logs'
 
@@ -36,12 +36,12 @@ if __name__ == '__main__':
     # === Load Model === #
     backbone = resnet.Resnet_152(embedding_size)
     # softmax = Softmax(input_feature_size, embedding_size, device_id=[torch.cuda._get_device_index(device)])
-    # sphereface = SphereFace(input_feature_size, embedding_size, device_id=[torch.cuda._get_device_index(device)])
+    sphereface = SphereFace(input_feature_size, embedding_size, device_id=[torch.cuda._get_device_index(device)])
     # cosface = CosFace(input_feature_size, embedding_size, device_id=[torch.cuda._get_device_index(device)])
     # arcface = ArcFace(input_feature_size, embedding_size, device_id=[torch.cuda._get_device_index(device)])
-    shaoface = ShaoFace(input_feature_size, embedding_size, device_id=[torch.cuda._get_device_index(device)])
+    # shaoface = ShaoFace(input_feature_size, embedding_size, device_id=[torch.cuda._get_device_index(device)])
     # head = siamasenet.SiamaseNet(device=device, head_name='Linear')
-    head = siamasenet.SiamaseNet(device=device, head=shaoface, head_name=shaoface.name)
+    head = siamasenet.SiamaseNet(device=device, head=sphereface, head_name=sphereface.name)
 
     if args.backbonePath and args.headPath:
         latest_backbone_path, latest_head_path = os.path.join(weights_root, args.backbonePath), os.path.join(
@@ -57,35 +57,44 @@ if __name__ == '__main__':
     head.to(device)
     print("Model load complete.")
 
+    for param in head.parameters():
+        param.requires_grad = False
+
     backbone.eval()
     head.eval()
 
     # === Perform Testing === #
     positive_distances = list()
     negative_distances = list()
-    prev_class_name = 0
+    prev_class_name = 'S518'
     positive_dict = {}
     negative_dict = {}
-    for a, p, n, class_names in tqdm(iter(test_dataloader), total=len(test_dataloader)):
+    for a, p, n, class_names in tqdm(test_dataloader, total=len(test_dataloader)):
         anchore, positive, negative = a.to(device), p.to(device), n.to(device)
-        anchore_features, positive_features, negative_features = backbone(anchore), backbone(positive), backbone(
-            negative)
+        with torch.no_grad():
+            anchore_features, positive_features, negative_features = backbone(anchore), backbone(positive), backbone(
+                negative)
 
-        positive_distance, negative_distance = head(anchore_features, positive_features, negative_features)
-        pds = positive_distance.detach().cpu().numpy()
-        nds = negative_distance.detach().cpu().numpy()
+            positive_distance, negative_distance = head(anchore_features, positive_features, negative_features)
+            pds = positive_distance.detach().cpu().numpy()
+            nds = negative_distance.detach().cpu().numpy()
+        # print(class_names)
 
         for i, class_name in enumerate(class_names):
-            if not int(class_name) == prev_class_name:
+            # if int(class_name) == 98 or int(class_name) == 99:
+            #     print(f'classname found: {class_name}')
+            if not class_name == prev_class_name:
                 # print(f'Previous class: {prev_class_name}, Current class: {class_name}')
                 positive_dict[prev_class_name] = positive_distances
                 negative_dict[prev_class_name] = negative_distances
-                prev_class_name = int(class_name)
+                prev_class_name = class_name
                 positive_distances = []
                 negative_distances = []
 
             positive_distances.append(pds[i])
             negative_distances.append(nds[i])
+            positive_dict[class_name] = positive_distances
+            negative_dict[class_name] = negative_distances
 
         # print(positive_distances)
 

@@ -17,13 +17,13 @@ def get_distances(log_file_path):
 
 
 LOG_DIR = './logs'
-SIAMASE_DIR = os.path.join(LOG_DIR, 'test_siamese_200_1_logs.npy')
-SOFTMAX_DIR = os.path.join(LOG_DIR, 'test_softmax_200_1_logs.npy')
-SPHERE_DIR = os.path.join(LOG_DIR, 'test_sphere_200_1_logs.npy')
-COSFACE_DIR = os.path.join(LOG_DIR, 'test_cosface_200_1_logs.npy')
-ARCFACE_DIR = os.path.join(LOG_DIR, 'test_arcface_200_1_logs.npy')
+# SIAMASE_DIR = os.path.join(LOG_DIR, 'test_siamese_200_1_logs.npy')
+# SOFTMAX_DIR = os.path.join(LOG_DIR, 'test_softmax_200_1_logs.npy')
+SPHERE_DIR = os.path.join(LOG_DIR, 'test_sphereface_frvt_logs.npy')
+COSFACE_DIR = os.path.join(LOG_DIR, 'test_cosface_frvt_logs.npy')
+ARCFACE_DIR = os.path.join(LOG_DIR, 'test_arcface_frvt_logs.npy')
 
-dirs = [SIAMASE_DIR, SOFTMAX_DIR, SPHERE_DIR, COSFACE_DIR, ARCFACE_DIR]
+dirs = [SPHERE_DIR, COSFACE_DIR, ARCFACE_DIR]
 
 parser = argparse.ArgumentParser(prog="generate_result_csv",
                                  description='Reads numpy log files from LOG_DIR and generates csv with the mean values of positive and negative loss for different head models. ')
@@ -32,7 +32,8 @@ parser.add_argument('outputFileName')
 args = parser.parse_args()
 
 headers = ['Head Name', 'Average Positive Distance', 'Average Negative Distance']
-head_names = ['Siamese', 'SoftMax', 'SphereFace', 'CosFace', 'ArcFace']
+# head_names = ['Siamese', 'SoftMax', 'SphereFace', 'CosFace', 'ArcFace']
+head_names = ['SphereFace', 'CosFace', 'ArcFace']
 output_file = os.path.join(LOG_DIR, args.outputFileName)
 
 with open(output_file, 'w', newline='') as file:

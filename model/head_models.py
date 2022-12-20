@@ -65,8 +65,8 @@ class ArcFace(nn.Module):
             one_hot = one_hot.cuda(self.device_id[0])
         one_hot.scatter_(1, label.view(-1, 1).long(), 1)
         # -------------torch.where(out_i = {x_i if condition_i else y_i) -------------
-        output = (one_hot * phi) + \
-                 ((1.0 - one_hot) * cosine)  # you can use torch.where if your torch.__version__ is 0.4
+        output = (one_hot * phi) + (
+                    (1.0 - one_hot) * cosine)  # you can use torch.where if your torch.__version__ is 0.4
         output *= self.s
 
         return output
@@ -195,13 +195,14 @@ class SphereFace(nn.Module):
         theta = cos_theta.data.acos()
         k = (self.m * theta / 3.14159265).floor()
         phi_theta = ((-1.0) ** k) * cos_m_theta - 2 * k
-        NormOfFeature = torch.norm(input, 2, 1)
+        NormOfFeature = torch.norm(input, 2, 1)  # question #
 
         # --------------------------- convert label to one-hot ---------------------------
         one_hot = torch.zeros(cos_theta.size())
         if self.device_id != None:
             one_hot = one_hot.cuda(self.device_id[0])
-        one_hot.scatter_(1, label.view(-1, 1).long(), 1)
+        reshape_label = label.view(-1, 1)
+        one_hot.scatter_(1, reshape_label.long(), 1.)
 
         # --------------------------- Calculate output ---------------------------
         output = (one_hot * (phi_theta - cos_theta) / (1 + self.lamb)) + cos_theta
