@@ -60,6 +60,9 @@ class SiamaseNet(nn.Module):
         # return an_emb, pos_emb, neg_emb
         # return self.flat(anchor), self.flat(positive), self.flat(negative)
 
+    def extract_features(self, images, labels):
+        return self.head(self.flat(images), labels), labels
+
 
 class DistanceLayer(nn.Module):
     def __init__(self):
