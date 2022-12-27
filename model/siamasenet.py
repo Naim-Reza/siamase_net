@@ -61,6 +61,8 @@ class SiamaseNet(nn.Module):
         # return self.flat(anchor), self.flat(positive), self.flat(negative)
 
     def extract_features(self, images, labels):
+        if self.head_name not in self.requires_label:
+            return self.head(self.flat(images)), labels
         return self.head(self.flat(images), labels), labels
 
 

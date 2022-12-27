@@ -37,11 +37,12 @@ class SiameseDataset(Dataset):
         anchore_image = self.preprocess_image(anchore_image_path)
         positive_image = self.preprocess_image(positive_image_path)
         negative_image = self.preprocess_image(negative_image_path)
-        class_name = anchore_image_path.split('/')[-2]
+        positive_class_name = anchore_image_path.split('/')[-2]
+        negative_class_name = negative_image_path.split('/')[-2]
 
-        if not self.test:
-            return anchore_image, positive_image, negative_image
-        return anchore_image, positive_image, negative_image, class_name
+        # if not self.test:
+        #     return anchore_image, positive_image, negative_image
+        return anchore_image, positive_image, negative_image, int(positive_class_name), int(negative_class_name)
 
     def preprocess_image(self, image_path):
         image = Image.open(image_path)
