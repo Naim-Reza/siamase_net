@@ -11,7 +11,7 @@ class Flatten(nn.Module):
 class SiamaseNet(nn.Module):
     def __init__(self, head=None, head_name='Linear', input_features=2048, output_features=512, device=None):
         super(SiamaseNet, self).__init__()
-        assert head_name in ['ShaoFace', 'ArcFace', 'CosFace', 'SphereFace', 'SoftMax', 'Linear']
+        assert head_name in ['ShaoFace', 'ArcFace', 'CosFace', 'SphereFace', 'SoftMax', 'Linear', 'MAAM']
         self.head_name = head_name
         self.input_features = input_features
         self.output_features = output_features
@@ -34,17 +34,17 @@ class SiamaseNet(nn.Module):
         else:
             self.head = head
 
-        self.requires_label = ['ShaoFace', 'ArcFace', 'CosFace', 'SphereFace']
+        self.requires_label = ['ShaoFace', 'ArcFace', 'CosFace', 'SphereFace', 'MAAM']
 
-    def forward(self, anchor, positive, negative):
+    def forward(self, anchor, positive, negative, positive_labels, negative_labels):
         if self.head_name not in self.requires_label:
             an_emb = self.sc(self.flat(anchor))
             pos_emb = self.sc(self.flat(positive))
             neg_emb = self.sc(self.flat(negative))
             return self.distance(an_emb, pos_emb, neg_emb)
 
-        positive_labels = torch.ones(anchor.shape[0]).to(self.device)
-        negative_labels = torch.zeros(negative.shape[0]).to(self.device)
+        # positive_labels = torch.ones(anchor.shape[0]).to(self.device)
+        # negative_labels = torch.zeros(negative.shape[0]).to(self.device)
         an_emb = self.head(self.flat(anchor), positive_labels)
         pos_emb = self.head(self.flat(positive), positive_labels)
         neg_emb = self.head(self.flat(negative), negative_labels)

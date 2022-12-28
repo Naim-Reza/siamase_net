@@ -18,6 +18,8 @@ def train(train_dataloader, val_dataloader, backbone, head, num_epoch, device, c
 
     writing_freq = 4
 
+    torch.autograd.set_detect_anomaly(True)
+
     for epoch in range(num_epoch):
         print(f'EPOCH: {epoch + 1}/{num_epoch}')
         print('=' * 20)
@@ -30,13 +32,16 @@ def train(train_dataloader, val_dataloader, backbone, head, num_epoch, device, c
 
         running_loss = 0.0
 
-        for a, p, n in tqdm(iter(train_dataloader)):
-            anchore, positive, negative = a.to(device), p.to(device), n.to(device)
+        for a, p, n, pos_labels, neg_labels in tqdm(iter(train_dataloader)):
+            pos_labels, neg_labels = torch.tensor(pos_labels, dtype=torch.int64, device=device), torch.tensor(
+                neg_labels, dtype=torch.int64, device=device)
+            anchore, positive, negative = a.to(device), p.to(device), n.to(
+                device)
 
             features_a, features_p, features_n = backbone(anchore), backbone(positive), backbone(negative)
             # print(features_a.shape, features_p.shape, features_n.shape)
             # a_emb, p_emb, n_emb = head(features_a, features_p, features_n)
-            ap_dis, an_dis = head(features_a, features_p, features_n)
+            ap_dis, an_dis = head(features_a, features_p, features_n, pos_labels, neg_labels)
             # print(ap_dis, an_dis)
 
             loss = criterion.compute_loss(ap_dis, an_dis)
@@ -63,12 +68,14 @@ def train(train_dataloader, val_dataloader, backbone, head, num_epoch, device, c
         head.eval()
 
         current_loss = 0.0
-        for a, p, n in tqdm(iter(val_dataloader)):
-            with torch.set_grad_enabled(False):
+        for a, p, n, pos_labels, neg_labels in tqdm(iter(val_dataloader)):
+            pos_labels, neg_labels = torch.tensor(pos_labels, dtype=torch.int64, device=device), torch.tensor(
+                neg_labels, dtype=torch.int64, device=device)
+            with torch.no_grad():
                 anchore, positive, negative = a.to(device), p.to(device), n.to(device)
                 features_a, features_p, features_n = backbone(anchore), backbone(positive), backbone(negative)
                 # a_emb, p_emb, n_emb = head(features_a, features_p, features_n)
-                ap_dis, an_dis = head(features_a, features_p, features_n)
+                ap_dis, an_dis = head(features_a, features_p, features_n, pos_labels, neg_labels)
 
                 loss = criterion.compute_loss(ap_dis, an_dis)
                 # loss = criterion(a_emb, p_emb, n_emb)
