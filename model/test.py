@@ -58,7 +58,7 @@ if __name__ == '__main__':
     #
     #
     model = resnet.Resnet_152(512)
-    maam_net = MAAM(2048, 512)
+    maam_net = MAAM(2048, 512, m=5)
     maam_net.register_full_backward_hook(printgradvals)
     # sp_face = sphere_face.AngleLinear(2048, 512, phiflag=False)
     # sp_face_loss = sphere_face.AngleLoss()

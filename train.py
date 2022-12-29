@@ -48,7 +48,7 @@ if __name__ == '__main__':
     # cosface = CosFace(input_feature_size, embedding_size, device_id=[torch.cuda._get_device_index(device)])
     # arcface = ArcFace(input_feature_size, embedding_size, device_id=[torch.cuda._get_device_index(device)])
     # shaoface = ShaoFace(input_feature_size, embedding_size, device_id=[torch.cuda._get_device_index(device)])
-    maam_net = maam.MAAM(input_feature_size, embedding_size)
+    maam_net = maam.MAAM(input_feature_size, embedding_size, m=5)
     backbone = resnet.Resnet_152(embedding_size)
     # head = siamasenet.SiamaseNet(device=device, head_name='Linear')
     head = siamasenet.SiamaseNet(device=device, head=maam_net, head_name=maam_net.name)

@@ -18,7 +18,7 @@ if __name__ == '__main__':
 
     x_p, y_p = to_array(positive_distances)
     x_n, y_n = to_array(negative_distances)
-    print(y_p)
+    # print(y_p)
 
     plt.scatter(x_p, y_p, alpha=0.5)
     plt.scatter(x_n, y_n, alpha=0.5)

@@ -43,7 +43,7 @@ if __name__ == '__main__':
     # arcface = ArcFace(input_feature_size, embedding_size, device_id=[torch.cuda._get_device_index(device)])
     # shaoface = ShaoFace(input_feature_size, embedding_size, device_id=[torch.cuda._get_device_index(device)])
     # head = siamasenet.SiamaseNet(device=device, head_name='Linear')
-    maam_net = MAAM(input_feature_size, embedding_size)
+    maam_net = MAAM(input_feature_size, embedding_size, m=5)
     head = siamasenet.SiamaseNet(device=device, head=maam_net, head_name=maam_net.name)
 
     if args.backbonePath and args.headPath:
@@ -69,7 +69,7 @@ if __name__ == '__main__':
     # === Perform Testing === #
     positive_distances = list()
     negative_distances = list()
-    prev_class_name = 13340
+    prev_class_name = 0
     positive_dict = {}
     negative_dict = {}
     for a, p, n, class_names, neg_labels in tqdm(test_dataloader, total=len(test_dataloader)):
