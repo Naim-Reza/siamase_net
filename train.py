@@ -20,7 +20,7 @@ if __name__ == '__main__':
     data_root = '/media/naim/4A62E7E862E7D6AB/Users/chosun/Datasets/setA_less/'
 
     input_size = 112
-    batch_size = 4
+    batch_size = 8
     input_feature_size = 2048
     embedding_size = 2048
     num_workers = 4
