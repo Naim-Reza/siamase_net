@@ -56,11 +56,12 @@ class MAAM(nn.Module):
         cos_m_theta_plus_m = self.fn_m[self.m](cos_theta, sin_theta)
         cos_m_theta_plus_m = torch.where(cos_theta > self.threshold, cos_m_theta_plus_m, cos_theta - self.mm)
 
-        n_one = k * 0.0 - 1
-        phi_theta = (n_one ** k) * cos_m_theta_plus_m - 2 * k
+        # n_one = k * 0.0 - 1
+        # phi_theta = (n_one ** k) * cos_m_theta_plus_m - 2 * k
 
         cos_m_theta_plus_m = cos_m_theta_plus_m * x_len.view(-1, 1)
-        phi_theta = phi_theta * x_len.view(-1, 1)
+        # phi_theta = phi_theta * x_len.view(-1, 1)
+        cos_theta = cos_theta * x_len.view(-1, 1)
         # print(f'Phi_theta: {phi_theta}')
         # print(f'CosMThetaPlusM: {cos_m_theta_plus_m}')
 
@@ -73,6 +74,9 @@ class MAAM(nn.Module):
         # self.lamda = max(self.lamda_min, self.lamda_max / (1 + self.gama * self.iteration))
 
         output = torch.ones_like(cos_m_theta_plus_m)
-        output[index] = phi_theta[index] - cos_m_theta_plus_m[index]
+        # output[index] = phi_theta[index] - cos_m_theta_plus_m[index]
+        output[index] = cos_m_theta_plus_m[index] - cos_theta[index]
+        s = 64
+        output *= s
 
         return output
